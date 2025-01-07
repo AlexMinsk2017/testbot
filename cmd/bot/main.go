@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/AlexMinsk2017/testbot/internal/service/product"
 	"log"
 	"os"
 
@@ -32,6 +33,8 @@ func main() {
 
 	updates := bot.GetUpdatesChan(u)
 
+	productService := product.NewService()
+
 	for update := range updates {
 		if update.Message == nil {
 			continue
@@ -39,6 +42,8 @@ func main() {
 		switch update.Message.Command() {
 		case "help":
 			helpCommand(bot, update.Message)
+		case "list":
+			listCommand(bot, update.Message, productService)
 		default:
 			defaultBehavior(bot, update.Message)
 		}
@@ -46,7 +51,22 @@ func main() {
 }
 
 func helpCommand(bot *tgbotapi.BotAPI, inputMessage *tgbotapi.Message) {
-	msg := tgbotapi.NewMessage(inputMessage.Chat.ID, "/help - help")
+	msg := tgbotapi.NewMessage(inputMessage.Chat.ID,
+		"/help - help"+
+			"\n/list - list products")
+	bot.Send(msg)
+}
+
+func listCommand(bot *tgbotapi.BotAPI, inputMessage *tgbotapi.Message, productService *product.Service) {
+
+	outputMsg := "all products: \n\n"
+
+	products := productService.List()
+	for _, product := range products {
+		outputMsg += product.Title + "\n"
+	}
+
+	msg := tgbotapi.NewMessage(inputMessage.Chat.ID, outputMsg)
 	bot.Send(msg)
 }
 
