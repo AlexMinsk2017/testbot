@@ -3,11 +3,10 @@ package main
 import (
 	"github.com/AlexMinsk2017/testbot/internal/app/commands"
 	"github.com/AlexMinsk2017/testbot/internal/service/product"
-	"log"
-	"os"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
+	"log"
+	"os"
 )
 
 // const token = "7655447204:AAEfYMaYTT3-Uh-1yOhpoy7R1kmUaoeRvmU"
@@ -38,16 +37,6 @@ func main() {
 	commander := commands.NewComander(bot, productService)
 
 	for update := range updates {
-		if update.Message == nil {
-			continue
-		}
-		switch update.Message.Command() {
-		case "help":
-			commander.Help(update.Message)
-		case "list":
-			commander.List(update.Message)
-		default:
-			commander.Default(update.Message)
-		}
+		commander.HandleUpdate(update)
 	}
 }
