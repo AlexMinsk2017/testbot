@@ -36,7 +36,7 @@ func main() {
 
 	var orderSets []OrderSet
 
-	for numOrder := 0; numOrder < numSets; numOrder++ {
+	for i := 0; i < numSets; i++ {
 
 		line, _ := reader.ReadString('\n')
 		strconv.Atoi(strings.TrimSpace(line))
