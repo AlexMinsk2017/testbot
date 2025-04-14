@@ -81,6 +81,8 @@ func TestTicTac(t *testing.T) {
 
 				if result != expected {
 					t.Errorf("Кейс #%d: ожидалось %s, получено %s", kit+1, expected, result)
+				} else {
+					fmt.Print(result + " - " + expected + "\n")
 				}
 			}
 		})

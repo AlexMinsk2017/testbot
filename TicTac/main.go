@@ -8,67 +8,78 @@ import (
 )
 
 var directions = [][2]int{
-	{0, 1},  // вправо
-	{1, 0},  // вниз
-	{1, 1},  // диагональ вниз-вправо
-	{1, -1}, // диагональ вниз-влево
+	{0, 1}, {1, 0},
+	{1, 1}, {1, -1},
 }
 
 func main() {
 	reader := bufio.NewReader(os.Stdin)
+	out := bufio.NewWriter(os.Stdout)
+	defer out.Flush()
+
 	var t int
-	fmt.Fscan(reader, &t)
+	fmt.Fscanln(reader, &t)
 
-	for kit := 0; kit < t; kit++ {
-
+	for test := 0; test < t; test++ {
 		var k, n, m int
-		fmt.Fscan(reader, &k)
-		fmt.Fscan(reader, &n, &m)
-
-		reader.ReadString('\n')
+		fmt.Fscanln(reader, &k)
+		fmt.Fscanln(reader, &n, &m)
 
 		board := make([][]rune, n)
 		for i := 0; i < n; i++ {
-			line, err := reader.ReadString('\n')
-			if err != nil {
-				return
-			}
+			line, _ := reader.ReadString('\n')
 			board[i] = []rune(strings.TrimSpace(line))
 		}
+
 		if dfs(board, k, n, m) {
-			fmt.Println("YES")
+			fmt.Fprintln(out, "YES")
 		} else {
-			fmt.Println("NO")
+			fmt.Fprintln(out, "NO")
 		}
 	}
 }
 
-func check(board [][]rune, k, n, m int, player rune) bool {
+func inBorders(x, y, n, m int) bool {
+	return x >= 0 && x < n && y >= 0 && y < m
+}
 
-	inBorders := func(x, y int) bool {
-		return x >= 0 && x < n && y >= 0 && y < m
+func checkFromCell(board [][]rune, k, n, m, x, y int, player rune) bool {
+	for _, dir := range directions {
+		count := 1
+		for step := 1; step < k; step++ {
+			nx, ny := x+dir[0]*step, y+dir[1]*step
+			if inBorders(nx, ny, n, m) && board[nx][ny] == player {
+				count++
+			} else {
+				break
+			}
+		}
+		for step := 1; step < k; step++ {
+			nx, ny := x-dir[0]*step, y-dir[1]*step
+			if inBorders(nx, ny, n, m) && board[nx][ny] == player {
+				count++
+			} else {
+				break
+			}
+		}
+		if count >= k {
+			return true
+		}
 	}
+	return false
+}
 
+func check(board [][]rune, k, n, m int, player rune) bool {
 	for i := 0; i < n; i++ {
 		for j := 0; j < m; j++ {
 			if board[i][j] != player {
 				continue
 			}
-			for _, dir := range directions {
-				count := 1
-				x, y := i+dir[0], j+dir[1]
-				for inBorders(x, y) && board[x][y] == player {
-					count++
-					if count == k {
-						return true
-					}
-					x += dir[0]
-					y += dir[1]
-				}
+			if checkFromCell(board, k, n, m, i, j, player) {
+				return true
 			}
 		}
 	}
-
 	return false
 }
 
@@ -88,36 +99,6 @@ func dfs(board [][]rune, k, n, m int) bool {
 				return true
 			}
 			board[i][j] = '.'
-		}
-	}
-
-	return false
-}
-
-func checkFromCell(board [][]rune, k, n, m, x, y int, player rune) bool {
-	inBorders := func(x, y int) bool {
-		return x >= 0 && x < n && y >= 0 && y < m
-	}
-	for _, dir := range directions {
-		count := 1
-		dx, dy := dir[0], dir[1]
-
-		nx, ny := x+dx, y+dy
-		for inBorders(nx, ny) && board[nx][ny] == player {
-			count++
-			nx += dx
-			ny += dy
-		}
-
-		nx, ny = x-dx, y-dy
-		for inBorders(nx, ny) && board[nx][ny] == player {
-			count++
-			nx -= dx
-			ny -= dy
-		}
-
-		if count >= k {
-			return true
 		}
 	}
 	return false
